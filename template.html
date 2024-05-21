@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: auto;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .section-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 20px;
+            border-bottom: 2px solid #ccc;
+            padding-bottom: 5px;
+        }
+        .article {
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+        }
+        .title {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .url {
+            color: #1a0dab;
+        }
+        .content {
+            margin-top: 5px;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>오늘의 뉴스 요약</h2>
+            <p>{{ date }}</p>
+        </div>
+
+        <div class="section-title">1. The Hacker News</div>
+        {% for article in hacker_news %}
+        <div class="article">
+            <div class="title">{{ article.title }}</div>
+            <div class="url"><a href="{{ article.url }}" target="_blank">{{ article.url }}</a></div>
+            <div class="date">{{ article.date }}</div>
+            <div class="tag">{{ article.tag }}</div>
+            <div class="content">{{ article.content }}</div>
+        </div>
+        {% endfor %}
+
+        <div class="section-title">2. Security Affairs</div>
+        {% for article in security_affairs %}
+        <div class="article">
+            <div class="title">{{ article.title }}</div>
+            <div class="url"><a href="{{ article.url }}" target="_blank">{{ article.url }}</a></div>
+            <div class="date">{{ article.date }}</div>
+            <div class="tag">{{ article.tag }}</div>
+            <div class="content">{{ article.content }}</div>
+        </div>
+        {% endfor %}
+
+        <div class="section-title">3. 보안뉴스</div>
+        {% for article in boan_news %}
+        <div class="article">
+            <div class="title">{{ article.title }}</div>
+            <div class="url"><a href="{{ article.url }}" target="_blank">{{ article.url }}</a></div>
+            <div class="date">{{ article.date }}</div>
+            <div class="content">{{ article.content }}</div>
+        </div>
+        {% endfor %}
+
+        <div class="section-title">4. 데일리시큐</div>
+        {% for article in daily_secu %}
+        <div class="article">
+            <div class="title">{{ article.title }}</div>
+            <div class="url"><a href="{{ article.url }}" target="_blank">{{ article.url }}</a></div>
+            <div class="date">{{ article.date }}</div>
+            <div class="tag">{{ article.tag }}</div>
+            <div class="content">{{ article.content }}</div>
+        </div>
+        {% endfor %}
+
+        <div class="footer">
+            <p>이 메일은 자동으로 생성되었습니다.</p>
+        </div>
+    </div>
+</body>
+</html>
