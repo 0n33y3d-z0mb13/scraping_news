@@ -1,3 +1,5 @@
+#! /usr/bin/python3
+
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import smtplib
@@ -153,7 +155,7 @@ def generate_html(article_list):
 
 if __name__ == "__main__":
     # html 내용 전체를 저장하는 html_content
-    html_content += f'<h1>컴퓨터쟁이가 알려주는 오늘의 새 보안 소식<br>({datetime.now().strftime("%Y-%m-%d")})</h1>'
+    html_content += f'<h1>오늘의 보안 새 소식</h1><br><h2>({datetime.now().strftime("%Y-%m-%d")})</h2>'
     html_content += '<p>※ 제목을 누르면 기사로 이동합니다.</p>'
     empty_article = False
     empty_article_platform_list = []
