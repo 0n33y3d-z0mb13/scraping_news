@@ -2,12 +2,28 @@ import requests
 from bs4 import BeautifulSoup
 import urllib3
 from urllib3.exceptions import InsecureRequestWarning
-import datetime
+import time
 from datetime import datetime
 import xml.etree.ElementTree as ET
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
+from webdriver_manager.chrome import ChromeDriverManager
+from bs4 import BeautifulSoup
 requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
 urllib3.disable_warnings()
 
+# 셀레니움 설정
+chrome_options = Options() # 크롬 옵션 설정
+chrome_options.add_argument("--headless")  # 브라우저 창을 띄우지 않음
+chrome_options.add_argument("--no-sandbox")
+chrome_options.add_argument("--disable-dev-shm-usage")
+
+service = Service(ChromeDriverManager().install()) 
+driver = webdriver.Chrome(service=service, options=chrome_options) # 크롬 드라이버 설정
+
+# 헤더 설정
 headers = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36"
 }
@@ -215,7 +231,7 @@ def ahnlab_asec():
     except requests.RequestException as e:
         print(f"페이지 요청 중 오류 발생: {e}")
 
-def theori_blog_vuln():
+def theori_blog():
     article_list = []
  
     try:
@@ -251,16 +267,9 @@ def theori_blog_vuln():
                 }
                 article_list.append(article_dict)
             print("[+] theori blog vuln parsing done...")
-            return article_list
         else:
-            print(f"페이지를 가져오는데 실패했습니다. URL: {url}")
-    except requests.RequestException as e:
-        print(f"페이지 요청 중 오류 발생: {e}")
+            print(f"[-] theori blog vuln: 페이지를 가져오는데 실패했습니다. URL: {url}")
 
-def theori_blog_web2():
-    article_list = []
- 
-    try:
         response = requests.get("https://blog.theori.io/web2/home", timeout=10, verify=False)  # 타임아웃 설정
 
         # 요청이 성공했는지 확인
@@ -292,16 +301,9 @@ def theori_blog_web2():
             }
             article_list.append(article_dict)
             print("[+] theori blog web2 parsing done...")
-            return article_list
         else:
-            print(f"페이지를 가져오는데 실패했습니다. URL: {url}")
-    except requests.RequestException as e:
-        print(f"페이지 요청 중 오류 발생: {e}")
+            print(f"[-] theori blog web2: 페이지를 가져오는데 실패했습니다. URL: {url}")
 
-def theori_blog_web3():
-    article_list = []
- 
-    try:
         response = requests.get("https://blog.theori.io/web3/home", timeout=10, verify=False)  # 타임아웃 설정
 
         # 요청이 성공했는지 확인
@@ -335,7 +337,7 @@ def theori_blog_web3():
             print("[+] theori blog web3 parsing done...")
             return article_list
         else:
-            print(f"페이지를 가져오는데 실패했습니다. URL: {url}")
+            print(f"[-] theori blog web3: 페이지를 가져오는데 실패했습니다. URL: {url}")
     except requests.RequestException as e:
         print(f"페이지 요청 중 오류 발생: {e}")
 
@@ -376,46 +378,71 @@ def mandiant_blog():
 
 def s2w_blog():
     article_list = []
+    timeout=10
+    max_retries = 3
+    attempts = 0
 
-    try:
-        response = requests.get("https://s2w.medium.com/", headers=headers, timeout=20, verify=False)  # 타임아웃 설정
+    # 타임 아웃이 빈번히 발생하므로 요청이 갈 때 까지 무한 루프를 돌림
+    while attempts < max_retries:
+        try:
+            response = requests.get("https://s2w.medium.com/", headers=headers, timeout=timeout, verify=False)  # 타임아웃 설정
 
-        # 요청이 성공했는지 확인
-        if response.status_code == 200:
-            # HTML 파싱
-            soup = BeautifulSoup(response.text, 'html.parser')
-            articles_div = soup.find("div", class_="l ae")
-            articles = articles_div.findAll("div", class_="ab cm")
-            
-            for article in articles:
-                # 고정되어 있는 게시물인 경우 패스한다.
-                if article.find('div', class_="be b do z dn ab ld hb"):
+            # 요청이 성공했는지 확인
+            if response.status_code == 200:
+                # HTML 파싱
+                soup = BeautifulSoup(response.text, 'html.parser')
+                articles_div = soup.find("div", class_="l ae")
+
+                # 기사를 불러오지 못하는 경우 재시도
+                if not articles_div:
+                    print("[-] s2w blog: Unable to find the article list. Retrying...")
+                    attempts += 1
+                    timeout += 5  # Increase timeout
                     continue
+
+                articles = articles_div.findAll("div", class_="ab cm")
                 
-                title = article.find('h2').text.strip()
-
-                url = article.find('a', class_="af ag ah ai aj ak al am an ao ap aq ar as at")["href"].strip() 
+                for article in articles:
+                    # 고정되어 있는(가장 상단에 pinned 된) 게시물인 경우 패스한다.
+                    if article.find('div', class_="be b do z dn ab ld hb"):
+                        continue
+                    
+                    title = article.find('h2').text.strip()
+                    url = article.find('a', class_="af ag ah ai aj ak al am an ao ap aq ar as at")["href"].strip() 
                 
-                date_div = article.find("div", class_="nh ni nj nk nl ab q")
-                date_spans = date_div.find_all("span")
-                date = date_spans[3].text if len(date_spans) > 2 else None
+                    date_div = article.find("div", class_="nh ni nj nk nl ab q")
+                    if not date_div:
+                        print("[-] s2w blog: Unable to find the date_div. Retrying...")
+                        attempts += 1
+                        timeout += 5  # Increase timeout
+                        continue
+                    date_spans = date_div.find_all("span")
+                    date = date_spans[3].text if len(date_spans) > 2 else None
+                    date_obj = datetime.strptime(date, "%b %d, %Y")
+                    formatted_date = date_obj.strftime("%Y-%m-%d")
 
-                date_obj = datetime.strptime(date, "%b %d, %Y")
-                formatted_date = date_obj.strftime("%Y-%m-%d")
-
-                article_dict = {
-                    "platform": "S2W Blog",
-                    "title": title,
-                    "date": formatted_date,
-                    "url": "https://medium.com/s2wblog"+url,
-                }
-                article_list.append(article_dict)
-            print("[+] s2w blog parsing done...")
-            return article_list
-        else:
-            print(f"페이지를 가져오는데 실패했습니다. URL: {url}")
-    except requests.RequestException as e:
-        print(f"페이지 요청 중 오류 발생: {e}")
+                    article_dict = {
+                        "platform": "S2W Blog",
+                        "title": title,
+                        "date": formatted_date,
+                        "url": "https://medium.com/s2wblog"+url,
+                    }
+                    article_list.append(article_dict)
+                print("[+] s2w blog parsing done...")
+                return article_list
+            else:
+                print(f"[-] s2w blog: Request failed. Status code: {response.status_code}, URL: {url}")
+                attempts += 1
+                timeout += 5  # 타임아웃 증가
+        except requests.exceptions.Timeout:
+            attempts += 1
+            timeout += 5
+            print(f"[-] s2w blog: Request timed out. Increasing timeout to {timeout} and retrying...")
+        except requests.RequestException as e:
+            print(f"[-] s2w blog: {e}")
+            return article_list  # 심각한 오류 발생 시 함수 종료
+    print("[-] s2w blog: Exceeded maximum number of retries. ")
+    return article_list
 
 def akamai_blog():
     article_list = []
@@ -489,6 +516,7 @@ def cloudflare_blog():
                     "content": content
                 }
                 article_list.append(article_dict)
+            print("[+] cloudflare blog parsing done...")
             return article_list
         else:
             print(f"페이지를 가져오는데 실패했습니다. URL: {url}")
@@ -499,36 +527,41 @@ def sans_blog():
     article_list = []
 
     try:
-        response = requests.get("https://www.sans.org/blog/", timeout=10, verify=False)  # 타임아웃 설정
+        # 웹 페이지 열기
+        driver.get("https://www.sans.org/blog/")
 
-        # 요청이 성공했는지 확인
-        if response.status_code == 200:
-            # HTML 파싱
-            with open("./response.html", "w") as file:
-                file.write(response.text)
-            soup = BeautifulSoup(response.text, 'html.parser')
-            articles = soup.findAll("li", class_="article-listing__item")
-            print(articles)
-            
-            for article in articles:
-                title = article.find('div', class_="title").text.strip()
+        # 필요한 데이터가 로드될 때까지 대기 (예: 10초 대기)
+        driver.implicitly_wait(10)
 
-                url = article.find("a")["href"].strip() #첫번째 나오는 a태그의 href 속성값을 가져옴                
-                
-                date = article.find("div", class_="date with-category").text.strip()
+        # 페이지 소스 가져오기
+        html = driver.page_source
 
-                content = article.find("div", class_="description whitespace-break-spaces").text.strip()
-                article_dict = {
-                    "platform": "SANS Blog",
-                    "title": title,
-                    "date": date,
-                    "url": "https://www.sans.org/"+url,
-                    "tag": "none",
-                    "content": content
-                }
-                article_list.append(article_dict)
-            return article_list
-        else:
-            print(f"페이지를 가져오는데 실패했습니다. URL: {url}")
+
+        # HTML 파싱
+        soup = BeautifulSoup(html, 'html.parser')
+        articles = soup.findAll("li", class_="article-listing__item")
+
+        for article in articles:
+            title = article.find('div', class_="title").text.strip()
+            url = article.find("a")["href"].strip() #첫번째 나오는 a태그의 href 속성값을 가져옴                
+            tag = article.find("div", class_="category").text.strip()
+            date = article.find("div", class_="date with-category").text.strip()
+            date_obj = datetime.strptime(date, "%b %d, %Y")
+            formatted_date = date_obj.strftime("%Y-%m-%d")
+            content = article.find("div", class_="description whitespace-break-spaces").text.strip()
+
+            article_dict = {
+                "platform": "SANS Blog",
+                "title": title,
+                "date": formatted_date,
+                "url": "https://www.sans.org/"+url,
+                "tag": tag,
+                "content": content
+            }
+            article_list.append(article_dict)
+
+        print("[+] sans blog parsing done...")
+        driver.quit()
+        return article_list
     except requests.RequestException as e:
         print(f"페이지 요청 중 오류 발생: {e}")
