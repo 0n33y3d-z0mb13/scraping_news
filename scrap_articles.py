@@ -108,7 +108,6 @@ html_footer = '''
     <footer>
         <p>이 페이지는 자동으로 생성되었습니다.</p>
         <p>개발자: 0n33y3d-z0mb13</p>
-        <p>문의: <a href="mailto:z0b13@example.com">kminji4466@gmail.com</a></p>
         <p><a href="https://github.com/0n33y3d-z0mb13/scraping_news" target="_blank">GitHub 프로젝트 링크</a></p>
         <p>&copy; 2024 0n33y3d-z0mb13. All rights reserved.</p>
     </footer>
