@@ -162,7 +162,7 @@ def generate_html(article_list):
 
 if __name__ == "__main__":
     # html 내용 전체를 저장하는 html_content
-    html_content += f'<h1>오늘의 보안 새 소식</h1><br><h2>({datetime.now().strftime("%Y-%m-%d")})</h2>'
+    html_content += f'<h1>오늘의 보안 새 소식<br>({datetime.now().strftime("%Y-%m-%d")})</h1>'
     html_content += '<p>※ 제목을 누르면 기사로 이동합니다.</p>'
     empty_article = False
     empty_article_platform_list = []
@@ -193,10 +193,9 @@ if __name__ == "__main__":
     html_content += html_footer
     html_content += '</body></html>'
 
-    with open("test.html", "w") as file:
+    with open(f"./result_{datetime.now().strftime('%Y-%m-%d')}.html", "w") as file:
         file.write(html_content)
 
     # 기사가 없을 경우 메일을 보내지 않는다.
-    if not empty_article:
-        send_email(html_content)
-        print("[+] Email sent successfully!")
+    send_email(html_content)
+    print("[+] Email sent successfully!")

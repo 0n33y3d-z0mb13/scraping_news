@@ -140,7 +140,7 @@ def daily_secu():
                     "platform": "데일리시큐",
                     "title": title,
                     "date": formatted_date,
-                    "url": url,
+                    "url": "https://www.dailysecu.com" + url,
                     "tag": tag,
                     "content": content
                 }
