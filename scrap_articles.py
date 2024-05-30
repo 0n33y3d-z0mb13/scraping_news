@@ -114,27 +114,35 @@ html_footer = '''
     '''
 
 def send_email(html_content):
-    # Get email credentials from 환경변수 
-    sender_email_address = os.getenv('EMAIL_ADDRESS')
-    sender_email_password = os.getenv('EMAIL_PASSWORD')
+    try:
+        # Get email credentials from 환경변수 
+        sender_email_address = os.getenv('EMAIL_ADDRESS')
+        sender_email_password = os.getenv('EMAIL_PASSWORD')
 
-    receiver_email_address = sender_email_address
+        receiver_email_address = sender_email_address
 
-    # Create message object
-    message = MIMEMultipart()
-    message['From'] = sender_email_address
-    message['To'] = receiver_email_address
-    message['Subject'] = f"[보안 뉴스 레터] {datetime.now().strftime('%Y-%m-%d')}"
+        if not sender_email_address or not sender_email_password:
+            raise ValueError("[-]이메일 주소 또는 비밀번호가 환경변수에 설정되지 않았습니다.")
 
-    # Attach HTML content to the message
-    message.attach(MIMEText(html_content, 'html'))
+        # Create message object
+        message = MIMEMultipart()
+        message['From'] = sender_email_address
+        message['To'] = receiver_email_address
+        message['Subject'] = f"[보안 뉴스 레터] {datetime.now().strftime('%Y-%m-%d')}"
 
-    # Create SMTP session
-    with smtplib.SMTP('smtp.gmail.com', 587) as session:
-        session.starttls()
-        session.login(sender_email_address, sender_email_password)
-        session.send_message(message)
-        session.quit()
+        # Attach HTML content to the message
+        message.attach(MIMEText(html_content, 'html'))
+
+        # Create SMTP session
+        with smtplib.SMTP('smtp.gmail.com', 587) as session:
+            session.starttls()
+            session.login(sender_email_address, sender_email_password)
+            session.send_message(message)
+            print("[+] 이메일이 성공적으로 전송되었습니다.")
+    except smtplib.SMTPExceptin as e:
+        print(f"[-] SMTP 오류 발생: {e}")
+    except Exception as e:
+        print(f"예외 발생: {e}")
 
 def generate_html(article_list):
     # HTML 안에 채워질 기사들을 불러온다.
@@ -159,7 +167,7 @@ if __name__ == "__main__":
     empty_article = False
     empty_article_platform_list = []
 
-    print("[*] Start scraping news...")
+    print(f"[*] Start scraping news... {datetime.now()}") 
     for scrap_function in scraping_functions:
         function_name = scraping_functions_names.get(scrap_function)
         article_list = scrap_function()
