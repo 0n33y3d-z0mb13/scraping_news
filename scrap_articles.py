@@ -146,9 +146,12 @@ def send_email(html_content):
 
 def generate_html(article_list):
     # HTML 안에 채워질 기사들을 불러온다.
+    # 어제의 날짜와 비교
+    yesterday = datetime.now() = timedelta(days=1)
     html_content = ""
     for article in article_list:
-        if article["date"] == datetime.now().strftime('%Y-%m-%d'):
+        # if article["date"] == datetime.now().strftime('%Y-%m-%d'):
+        if article["date"] == yesterday.strftime('%Y-%m-%d'):
             html_content += f'<div class="article">'
             html_content += f'<a href="{article["url"]}"><h3>{article["title"]}</h3></a>'
             if "tag" in article and article["tag"] != "none":
@@ -162,7 +165,7 @@ def generate_html(article_list):
 
 if __name__ == "__main__":
     # html 내용 전체를 저장하는 html_content
-    html_content += f'<h1>오늘의 보안 새 소식<br>({datetime.now().strftime("%Y-%m-%d")})</h1>'
+    html_content += f'<h1>보안 새 소식<br>({datetime.now().strftime("%Y-%m-%d")})</h1>'
     html_content += '<p>※ 제목을 누르면 기사로 이동합니다.</p>'
     empty_article = False
     empty_article_platform_list = []
