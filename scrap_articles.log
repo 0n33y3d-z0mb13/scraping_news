@@ -112,3 +112,7 @@
 [+] sans blog parsing done...
 [+] 이메일이 성공적으로 전송되었습니다.
 [+] Email sent successfully!
+  File "/home/kminji4466/project/scraping_news/scrap_articles.py", line 150
+    yesterday = datetime.now() = timedelta(days=1)
+                ^^^^^^^^^^^^^^
+SyntaxError: cannot assign to function call

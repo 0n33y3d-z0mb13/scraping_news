@@ -3,7 +3,7 @@
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import smtplib
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 from scraping_functions import hacker_news, security_affairs, daily_secu, boan_news, ahnlab_asec, theori_blog, mandiant_blog, s2w_blog, akamai_blog, cloudflare_blog, sans_blog
 
@@ -147,7 +147,7 @@ def send_email(html_content):
 def generate_html(article_list):
     # HTML 안에 채워질 기사들을 불러온다.
     # 어제의 날짜와 비교
-    yesterday = datetime.now() = timedelta(days=1)
+    yesterday = datetime.now() - timedelta(days=1)
     html_content = ""
     for article in article_list:
         # if article["date"] == datetime.now().strftime('%Y-%m-%d'):
