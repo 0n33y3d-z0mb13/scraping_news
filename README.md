@@ -72,8 +72,8 @@
 ![img](./image/shell.png)   
 - crontab   
 ![img](./image/crontab.png)   
-- 결과 화면
-![img](./image/result.jpg)
+- 결과 화면   
+![img](./image/result.jpg)   
 
 ## 보완해야 할 점
 
